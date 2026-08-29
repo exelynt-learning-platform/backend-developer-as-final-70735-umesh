@@ -1,9 +1,11 @@
 package org.techhub.serviceimpl;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import org.springframework.stereotype.Service;
 
+import org.techhub.config.JwtConfig;
 import org.techhub.entity.User;
 import org.techhub.entity.UserSession;
 import org.techhub.repository.UserSessionRepository;
@@ -14,12 +16,14 @@ public class UserSessionServiceImpl
         implements UserSessionService {
 
     private final UserSessionRepository userSessionRepository;
+    private final JwtConfig jwtConfig;
 
     public UserSessionServiceImpl(
-            UserSessionRepository userSessionRepository) {
+            UserSessionRepository userSessionRepository,
+            JwtConfig jwtConfig) {
 
-        this.userSessionRepository =
-                userSessionRepository;
+        this.userSessionRepository = userSessionRepository;
+        this.jwtConfig = jwtConfig;
     }
 
     // =====================================================
@@ -34,9 +38,9 @@ public class UserSessionServiceImpl
         LocalDateTime createdAt =
                 LocalDateTime.now();
 
-        // JWT validity = 1 hour
+        // JWT validity synchronized with jwt.expiration
         LocalDateTime expiresAt =
-                createdAt.plusHours(1);
+                createdAt.plus(jwtConfig.getExpiration(), ChronoUnit.MILLIS);
 
         UserSession session =
                 new UserSession(

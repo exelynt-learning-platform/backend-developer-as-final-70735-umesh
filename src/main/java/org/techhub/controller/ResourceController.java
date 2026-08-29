@@ -31,7 +31,7 @@ public class ResourceController {
 	}
 
 	// Create Resource
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@PostMapping
 	public ResponseEntity<ResourceResponse> createResource(@Valid @RequestBody ResourceRequest request) {
 
@@ -41,7 +41,7 @@ public class ResourceController {
 	}
 
 	// Get All Resources
-	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+	@PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
 	@GetMapping
 	public ResponseEntity<List<ResourceResponse>> getAllResources() {
 
@@ -49,7 +49,7 @@ public class ResourceController {
 	}
 
 	// Get Resource By ID
-	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+	@PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
 	@GetMapping("/{id}")
 	public ResponseEntity<ResourceResponse> getResourceById(@PathVariable Long id) {
 
@@ -57,7 +57,7 @@ public class ResourceController {
 	}
 
 	// Get Resources By Type
-	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+	@PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
 	@GetMapping("/type/{type}")
 	public ResponseEntity<List<ResourceResponse>> getResourcesByType(@PathVariable ResourceType type) {
 
@@ -65,7 +65,7 @@ public class ResourceController {
 	}
 
 	// Update Resource
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@PutMapping("/{id}")
 	public ResponseEntity<ResourceResponse> updateResource(@PathVariable Long id,
 			@Valid @RequestBody ResourceRequest request) {
@@ -74,7 +74,7 @@ public class ResourceController {
 	}
 
 	// Delete Resource
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<String> deleteResource(@PathVariable Long id) {
 

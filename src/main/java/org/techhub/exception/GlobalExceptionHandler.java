@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -116,7 +118,53 @@ public class GlobalExceptionHandler {
     }
 
     // =====================================================
-    // STEP 70 - BAD REQUEST
+    // ACCESS DENIED EXCEPTION
+    // HTTP 403
+    // =====================================================
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ValidationErrorResponse> handleAccessDenied(
+            AccessDeniedException ex) {
+
+        ValidationErrorResponse response =
+                new ValidationErrorResponse(
+                        LocalDateTime.now(),
+                        HttpStatus.FORBIDDEN.value(),
+                        "Forbidden",
+                        ex.getMessage() != null ? ex.getMessage() : "Access denied"
+                );
+
+        return new ResponseEntity<>(
+                response,
+                HttpStatus.FORBIDDEN
+        );
+    }
+
+    // =====================================================
+    // AUTHENTICATION EXCEPTION
+    // HTTP 401
+    // =====================================================
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ValidationErrorResponse> handleAuthenticationException(
+            AuthenticationException ex) {
+
+        ValidationErrorResponse response =
+                new ValidationErrorResponse(
+                        LocalDateTime.now(),
+                        HttpStatus.UNAUTHORIZED.value(),
+                        "Unauthorized",
+                        ex.getMessage() != null ? ex.getMessage() : "Authentication failed"
+                );
+
+        return new ResponseEntity<>(
+                response,
+                HttpStatus.UNAUTHORIZED
+        );
+    }
+
+    // =====================================================
+    // STEP 70 - BAD REQUEST / ILLEGAL ARGUMENT
     // HTTP 400
     // =====================================================
 
@@ -129,6 +177,29 @@ public class GlobalExceptionHandler {
                         LocalDateTime.now(),
                         HttpStatus.BAD_REQUEST.value(),
                         "Bad Request",
+                        ex.getMessage()
+                );
+
+        return new ResponseEntity<>(
+                response,
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    // =====================================================
+    // ILLEGAL STATE EXCEPTION
+    // HTTP 400
+    // =====================================================
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ValidationErrorResponse> handleIllegalStateException(
+            IllegalStateException ex) {
+
+        ValidationErrorResponse response =
+                new ValidationErrorResponse(
+                        LocalDateTime.now(),
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Invalid Operation",
                         ex.getMessage()
                 );
 

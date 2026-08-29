@@ -31,7 +31,12 @@ class JwtServiceTest {
         String email = "user@gmail.com";
 
         String token =
-                jwtService.generateToken(email);        
+                jwtService.generateToken(email);
 
+        String extractedEmail =
+                jwtService.getEmailFromToken(token);
+
+        assertEquals(email, extractedEmail);
+        assertTrue(jwtService.isTokenValid(token));
     }
 }

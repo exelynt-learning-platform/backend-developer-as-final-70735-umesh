@@ -222,7 +222,7 @@ public ResponseEntity<ReservationResponse> getReservationById(@PathVariable Long
 
 **After:**
 ```java
-@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+@PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
 @GetMapping("/{id}")
 public ResponseEntity<ReservationResponse> getReservationById(@PathVariable Long id) {
     // NOW protected - only ADMIN and USER can access
@@ -237,31 +237,31 @@ public ResponseEntity<ReservationResponse> getReservationById(@PathVariable Long
 
 1. **createReservation() - Line 45**
    ```java
-   @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+   @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
    @PostMapping
    ```
 
 2. **getMyReservations() - Line 62**
    ```java
-   @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+   @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
    @GetMapping("/my")
    ```
 
 3. **cancelReservation() - Line 93**
    ```java
-   @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+   @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
    @DeleteMapping("/{id}")
    ```
 
 4. **getAllReservations() - Line 108**
    ```java
-   @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasAuthority('ADMIN')")
    @GetMapping("/admin/all")
    ```
 
 5. **confirmReservation() - Line 122**
    ```java
-   @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasAuthority('ADMIN')")
    @PostMapping("/admin/{id}/confirm")
    ```
 
@@ -273,42 +273,42 @@ public ResponseEntity<ReservationResponse> getReservationById(@PathVariable Long
 
 1. **createResource() - Line 33**
    ```java
-   @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasAuthority('ADMIN')")
    @PostMapping
    ```
    - Only ADMIN can create resources
 
 2. **getAllResources() - Line 42**
    ```java
-   @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+   @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
    @GetMapping
    ```
    - PUBLIC READ: ADMIN and USER can view
 
 3. **getResourceById() - Line 49**
    ```java
-   @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+   @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
    @GetMapping("/{id}")
    ```
    - PUBLIC READ: ADMIN and USER can view
 
 4. **getResourcesByType() - Line 56**
    ```java
-   @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+   @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
    @GetMapping("/type/{type}")
    ```
    - PUBLIC READ: ADMIN and USER can filter
 
 5. **updateResource() - Line 62**
    ```java
-   @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasAuthority('ADMIN')")
    @PutMapping("/{id}")
    ```
    - Only ADMIN can modify resources
 
 6. **deleteResource() - Line 69**
    ```java
-   @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasAuthority('ADMIN')")
    @DeleteMapping("/{id}")
    ```
    - Only ADMIN can delete resources

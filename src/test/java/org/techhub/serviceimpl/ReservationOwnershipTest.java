@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +15,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.techhub.entity.Reservation;
@@ -65,7 +68,8 @@ class ReservationOwnershipTest {
                 .setAuthentication(
                         new UsernamePasswordAuthenticationToken(
                                 "owner@gmail.com",
-                                null
+                                null,
+                                List.of(new SimpleGrantedAuthority("USER"))
                         )
                 );
 
@@ -89,16 +93,17 @@ class ReservationOwnershipTest {
                 .setAuthentication(
                         new UsernamePasswordAuthenticationToken(
                                 "other@gmail.com",
-                                null
+                                null,
+                                List.of(new SimpleGrantedAuthority("USER"))
                         )
                 );
 
         when(reservationRepository.findById(100L))
                 .thenReturn(Optional.of(reservation));
 
-        RuntimeException exception =
+        AccessDeniedException exception =
                 assertThrows(
-                        RuntimeException.class,
+                        AccessDeniedException.class,
                         () -> reservationService
                                 .getReservationById(100L)
                 );

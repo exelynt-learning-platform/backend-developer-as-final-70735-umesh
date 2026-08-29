@@ -1,8 +1,11 @@
 package org.techhub.config;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -11,6 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.techhub.security.JwtAuthenticationFilter;
 
 @Configuration
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -44,6 +48,19 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
+                        )
+                )
+
+                // =================================================
+                // EXCEPTION HANDLING - 401 FOR UNAUTHENTICATED
+                // =================================================
+
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendError(
+                                        HttpServletResponse.SC_UNAUTHORIZED,
+                                        "Unauthorized: " + authException.getMessage()
+                                )
                         )
                 )
 
@@ -121,24 +138,16 @@ public class SecurityConfig {
                         )
                         .hasAnyAuthority("USER", "ADMIN")
 
-                        // ADMIN -> ALL RESERVATIONS
+                        // USER + ADMIN -> FILTER RESERVATIONS
                         .requestMatchers(
                                 HttpMethod.GET,
-                                "/reservations/admin/all"
+                                "/reservations/filter"
                         )
-                        .hasAuthority("ADMIN")
+                        .hasAnyAuthority("USER", "ADMIN")
 
-                        // ADMIN -> CONFIRM RESERVATION
+                        // ADMIN -> ALL ADMIN RESERVATION ROUTES
                         .requestMatchers(
-                                HttpMethod.POST,
-                                "/reservations/admin/*/confirm"
-                        )
-                        .hasAuthority("ADMIN")
-
-                        // ADMIN -> DELETE RESERVATION
-                        .requestMatchers(
-                                HttpMethod.DELETE,
-                                "/reservations/admin/*"
+                                "/reservations/admin/**"
                         )
                         .hasAuthority("ADMIN")
 

@@ -5,16 +5,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-
 import org.springframework.boot.test.mock.mockito.MockBean;
-
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
-
 import org.techhub.controller.ReservationController;
+import org.techhub.repository.UserRepository;
 import org.techhub.service.ReservationService;
+import org.techhub.service.UserSessionService;
 
 @WebMvcTest(ReservationController.class)
 class SecurityTest {
@@ -24,6 +24,18 @@ class SecurityTest {
 
     @MockBean
     private ReservationService reservationService;
+
+    @MockBean
+    private JwtService jwtService;
+
+    @MockBean
+    private UserDetailsService userDetailsService;
+
+    @MockBean
+    private UserSessionService userSessionService;
+
+    @MockBean
+    private UserRepository userRepository;
 
     @Test
     void unauthenticatedUser_shouldBeUnauthorized()
@@ -43,7 +55,7 @@ class SecurityTest {
                 get("/reservations/my")
                         .with(
                                 user("user@gmail.com")
-                                        .roles("USER")
+                                        .authorities(new SimpleGrantedAuthority("USER"))
                         )
         )
         .andExpect(status().isOk());

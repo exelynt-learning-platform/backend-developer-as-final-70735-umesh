@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.techhub.repository.UserRepository;
 
 @Configuration
@@ -31,12 +32,6 @@ public class SecurityBeansConfig {
 
         return configuration.getAuthenticationManager();
     }
-
-    // =====================================================
-    // PASSWORD ENCODER
-    // =====================================================
-
-    
 
     // =====================================================
     // USER DETAILS SERVICE
@@ -67,7 +62,7 @@ public class SecurityBeansConfig {
                 )
 
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new UsernameNotFoundException(
                                 "User not found with email: " + username
                         )
                 );

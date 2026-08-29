@@ -13,11 +13,13 @@ import org.techhub.dto.RegisterRequest;
 import org.techhub.entity.Role;
 import org.techhub.entity.User;
 import org.techhub.entity.UserRole;
+import org.techhub.exception.UserNotFoundException;
 import org.techhub.repository.RoleRepository;
 import org.techhub.repository.UserRepository;
 import org.techhub.repository.UserRoleRepository;
 import org.techhub.security.JwtService;
 import org.techhub.service.AuthService;
+import org.techhub.service.UserSessionService;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -28,6 +30,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final UserSessionService userSessionService;
 
     public AuthServiceImpl(
             AuthenticationManager authenticationManager,
@@ -35,7 +38,8 @@ public class AuthServiceImpl implements AuthService {
             RoleRepository roleRepository,
             UserRoleRepository userRoleRepository,
             PasswordEncoder passwordEncoder,
-            JwtService jwtService) {
+            JwtService jwtService,
+            UserSessionService userSessionService) {
 
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
@@ -43,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
         this.userRoleRepository = userRoleRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.userSessionService = userSessionService;
     }
 
     // =====================================================
@@ -50,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
     // =====================================================
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
 
         Authentication authentication =
@@ -65,9 +70,12 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+                        new UserNotFoundException("User not found with email: " + email));
 
         String token = jwtService.generateToken(user.getEmail());
+
+        // Save session in database for stateful validation & logout tracking
+        userSessionService.saveSession(user, token);
 
         return new LoginResponse(
                 token,

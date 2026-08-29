@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,9 @@ import org.techhub.entity.Reservation;
 import org.techhub.entity.ReservationStatus;
 import org.techhub.entity.Resource;
 import org.techhub.entity.User;
+import org.techhub.exception.ReservationNotFoundException;
+import org.techhub.exception.ResourceNotFoundException;
+import org.techhub.exception.UserNotFoundException;
 import org.techhub.repository.ReservationRepository;
 import org.techhub.repository.ResourceRepository;
 import org.techhub.repository.UserRepository;
@@ -24,9 +28,7 @@ import org.techhub.service.ReservationService;
 public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
-
     private final ResourceRepository resourceRepository;
-
     private final UserRepository userRepository;
 
     public ReservationServiceImpl(
@@ -52,7 +54,7 @@ public class ReservationServiceImpl implements ReservationService {
         if (request.getStartTime() == null ||
                 request.getEndTime() == null) {
 
-            throw new RuntimeException(
+            throw new IllegalArgumentException(
                     "Start time and end time are required");
         }
 
@@ -60,7 +62,7 @@ public class ReservationServiceImpl implements ReservationService {
         if (!request.getStartTime()
                 .isBefore(request.getEndTime())) {
 
-            throw new RuntimeException(
+            throw new IllegalArgumentException(
                     "Start time must be before end time");
         }
 
@@ -68,14 +70,14 @@ public class ReservationServiceImpl implements ReservationService {
         Resource resource = resourceRepository
                 .findById(request.getResourceId())
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "Resource not found with id: "
                                         + request.getResourceId()));
 
         // Check resource availability
         if (!Boolean.TRUE.equals(resource.getAvailable())) {
 
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "Resource is not available");
         }
 
@@ -90,7 +92,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         if (alreadyBooked) {
 
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "Resource is already reserved for this time");
         }
 
@@ -103,8 +105,8 @@ public class ReservationServiceImpl implements ReservationService {
         User user = userRepository
                 .findByEmail(email)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "User not found"));
+                        new UserNotFoundException(
+                                "User not found with email: " + email));
 
         // =================================================
         // CREATE RESERVATION
@@ -157,8 +159,8 @@ public class ReservationServiceImpl implements ReservationService {
         User user = userRepository
                 .findByEmail(email)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "User not found"));
+                        new UserNotFoundException(
+                                "User not found with email: " + email));
 
         return reservationRepository
                 .findByUserId(user.getId())
@@ -180,7 +182,7 @@ public class ReservationServiceImpl implements ReservationService {
                 reservationRepository
                         .findById(id)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ReservationNotFoundException(
                                         "Reservation not found with id: "
                                                 + id));
 
@@ -205,7 +207,7 @@ public class ReservationServiceImpl implements ReservationService {
                 .getEmail()
                 .equals(email)) {
 
-            throw new RuntimeException(
+            throw new AccessDeniedException(
                     "You are not authorized to access this reservation");
         }
 
@@ -225,9 +227,15 @@ public class ReservationServiceImpl implements ReservationService {
                 reservationRepository
                         .findById(id)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ReservationNotFoundException(
                                         "Reservation not found with id: "
                                                 + id));
+
+        // Check if already cancelled
+        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+            throw new IllegalStateException(
+                    "Reservation is already cancelled");
+        }
 
         Authentication authentication =
                 SecurityContextHolder
@@ -248,7 +256,7 @@ public class ReservationServiceImpl implements ReservationService {
                     .getEmail()
                     .equals(email)) {
 
-                throw new RuntimeException(
+                throw new AccessDeniedException(
                         "You can cancel only your own reservation");
             }
         }
@@ -289,9 +297,20 @@ public class ReservationServiceImpl implements ReservationService {
                 reservationRepository
                         .findById(id)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ReservationNotFoundException(
                                         "Reservation not found with id: "
                                                 + id));
+
+        // Status checks
+        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+            throw new IllegalStateException(
+                    "Cannot confirm a cancelled reservation");
+        }
+
+        if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
+            throw new IllegalStateException(
+                    "Reservation is already confirmed");
+        }
 
         // Confirm reservation
         reservation.setStatus(
@@ -320,7 +339,7 @@ public class ReservationServiceImpl implements ReservationService {
                         .getContext()
                         .getAuthentication();
 
-        boolean isAdmin = authentication.getAuthorities()
+        boolean isAdmin = authentication != null && authentication.getAuthorities()
                 .stream()
                 .anyMatch(a -> a.getAuthority().equals("ADMIN"));
 

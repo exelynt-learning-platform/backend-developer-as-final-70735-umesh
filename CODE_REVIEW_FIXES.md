@@ -208,7 +208,7 @@ public Page<ReservationResponse> filterReservations(...) {
 
 **3. Controller Layer - Added @PreAuthorize:**
 ```java
-@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+@PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
 @GetMapping("/filter")
 public ResponseEntity<Page<ReservationResponse>> filterReservations(...)
 ```
@@ -251,6 +251,10 @@ curl -H "Authorization: Bearer <user-token>" \
 | 1 | JWT_SECRET unconfigured | BLOCKER | Runtime | ✅ FIXED | Prevents startup failure |
 | 2 | Auth filter silent bypass | CRITICAL | Security | ✅ FIXED | Returns proper 401 errors |
 | 3 | Reservation filter bypass | CRITICAL | Security | ✅ FIXED | User data isolation |
+| 4 | hasRole -> hasAuthority fix | BLOCKER | Authorization | ✅ FIXED | Role naming compatibility |
+| 5 | Token & session expiry mismatch | CRITICAL | Session | ✅ FIXED | Synchronized to 24h |
+| 6 | Missing session save on login | CRITICAL | Security | ✅ FIXED | Stateful token tracking |
+| 7 | Missing filter price validation | MAJOR | Validation | ✅ FIXED | Prevents invalid queries |
 
 ---
 

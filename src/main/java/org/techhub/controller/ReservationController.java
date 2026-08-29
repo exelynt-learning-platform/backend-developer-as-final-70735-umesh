@@ -42,7 +42,7 @@ public class ReservationController {
     // CREATE RESERVATION
     // =====================================================
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(
             @Valid @RequestBody ReservationRequest request) {
@@ -60,7 +60,7 @@ public class ReservationController {
     // GET MY RESERVATIONS
     // =====================================================
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @GetMapping("/my")
     public ResponseEntity<List<ReservationResponse>>
     getMyReservations() {
@@ -76,7 +76,7 @@ public class ReservationController {
     // ADMIN -> ANY
     // =====================================================
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @GetMapping("/{id}")
     public ResponseEntity<ReservationResponse>
     getReservationById(
@@ -92,7 +92,7 @@ public class ReservationController {
     // CANCEL OWN RESERVATION
     // =====================================================
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ReservationResponse>
     cancelReservation(
@@ -108,7 +108,7 @@ public class ReservationController {
     // GET ALL RESERVATIONS
     // =====================================================
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/admin/all")
     public ResponseEntity<List<ReservationResponse>>
     getAllReservations() {
@@ -123,7 +123,7 @@ public class ReservationController {
     // CONFIRM RESERVATION
     // =====================================================
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/admin/{id}/confirm")
     public ResponseEntity<ReservationResponse>
     confirmReservation(
@@ -139,7 +139,7 @@ public class ReservationController {
     // FILTER RESERVATIONS WITH PAGINATION
     // =====================================================
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @GetMapping("/filter")
     public ResponseEntity<Page<ReservationResponse>>
     filterReservations(
@@ -151,6 +151,28 @@ public class ReservationController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortOrder) {
 
+        // Validate price filter range
+        if (minPrice != null && minPrice < 0) {
+            throw new IllegalArgumentException("minPrice cannot be negative");
+        }
+
+        if (maxPrice != null && maxPrice < 0) {
+            throw new IllegalArgumentException("maxPrice cannot be negative");
+        }
+
+        if (minPrice != null && maxPrice != null && minPrice > maxPrice) {
+            throw new IllegalArgumentException("minPrice cannot be greater than maxPrice");
+        }
+
+        // Validate pagination parameters
+        if (page < 0) {
+            throw new IllegalArgumentException("Page index must not be less than zero");
+        }
+
+        if (size <= 0) {
+            throw new IllegalArgumentException("Page size must be greater than zero");
+        }
+
         // Build Pageable with sorting
         Sort.Direction direction = Sort.Direction.ASC;
 
@@ -160,7 +182,8 @@ public class ReservationController {
             direction = Sort.Direction.DESC;
         }
 
-        String sortField = sortBy != null ? sortBy : "id";
+        List<String> allowedSortFields = List.of("id", "price", "startTime", "endTime", "status", "purpose", "createdAt");
+        String sortField = (sortBy != null && allowedSortFields.contains(sortBy)) ? sortBy : "id";
 
         Pageable pageable = PageRequest.of(
                 page,

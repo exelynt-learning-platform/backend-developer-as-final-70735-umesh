@@ -8,6 +8,7 @@ import org.techhub.dto.ResourceRequest;
 import org.techhub.dto.ResourceResponse;
 import org.techhub.entity.Resource;
 import org.techhub.entity.ResourceType;
+import org.techhub.exception.ResourceNotFoundException;
 import org.techhub.repository.ResourceRepository;
 import org.techhub.service.ResourceService;
 
@@ -58,7 +59,7 @@ public class ResourceServiceImpl implements ResourceService {
 
         Resource resource = resourceRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "Resource not found with id: " + id));
 
         return convertToResponse(resource);
@@ -81,7 +82,7 @@ public class ResourceServiceImpl implements ResourceService {
 
         Resource resource = resourceRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "Resource not found with id: " + id));
 
         resource.setName(request.getName());
@@ -107,7 +108,7 @@ public class ResourceServiceImpl implements ResourceService {
 
         Resource resource = resourceRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "Resource not found with id: " + id));
 
         resourceRepository.delete(resource);
