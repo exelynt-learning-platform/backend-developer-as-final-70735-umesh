@@ -60,80 +60,93 @@ Postman
 
 ## Project Structure
 
-ResourceBookingSystem
-|
-|-- src
-|   |
-|   |-- main
-|   |   |
-|   |   |-- java
-|   |   |   |
-|   |   |   |-- org
-|   |   |       |
-|   |   |       |-- techhub
-|   |   |           |
-|   |   |           |-- ResourceBookingSystemApplication.java
-|   |   |           |
-|   |   |           |-- config
-|   |   |           |   |-- SecurityConfig.java
-|   |   |           |   |-- SecurityBeansConfig.java
-|   |   |           |   |-- PasswordConfig.java
-|   |   |           |
-|   |   |           |-- controller
-|   |   |           |   |-- AuthController.java
-|   |   |           |   |-- ResourceController.java
-|   |   |           |   |-- ReservationController.java
-|   |   |           |
-|   |   |           |-- dto
-|   |   |           |   |-- RegisterRequest.java
-|   |   |           |   |-- LoginRequest.java
-|   |   |           |   |-- LoginResponse.java
-|   |   |           |   |-- ResourceRequest.java
-|   |   |           |   |-- ResourceResponse.java
-|   |   |           |   |-- ReservationRequest.java
-|   |   |           |   |-- ReservationResponse.java
-|   |   |           |
-|   |   |           |-- entity
-|   |   |           |   |-- User.java
-|   |   |           |   |-- Role.java
-|   |   |           |   |-- UserRole.java
-|   |   |           |   |-- Resource.java
-|   |   |           |   |-- Reservation.java
-|   |   |           |   |-- ReservationStatus.java
-|   |   |           |
-|   |   |           |-- repository
-|   |   |           |   |-- UserRepository.java
-|   |   |           |   |-- RoleRepository.java
-|   |   |           |   |-- UserRoleRepository.java
-|   |   |           |   |-- ResourceRepository.java
-|   |   |           |   |-- ReservationRepository.java
-|   |   |           |
-|   |   |           |-- security
-|   |   |           |   |-- JwtService.java
-|   |   |           |   |-- JwtAuthenticationFilter.java
-|   |   |           |
-|   |   |           |-- service
-|   |   |           |   |-- AuthService.java
-|   |   |           |   |-- ResourceService.java
-|   |   |           |   |-- ReservationService.java
-|   |   |           |
-|   |   |           |-- serviceimpl
-|   |   |               |-- AuthServiceImpl.java
-|   |   |               |-- ResourceServiceImpl.java
-|   |   |               |-- ReservationServiceImpl.java
-|   |   |
-|   |   |-- resources
-|   |       |-- application.properties
-|   |
-|   |-- test
-|       |-- java
-|           |-- org
-|               |-- techhub
-|                   |-- ResourceBookingSystemApplicationTests.java
-|
-|-- pom.xml
-|-- README.md
-|-- .gitignore
+```text
+ResourceBookingSystem/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── org/
+│   │   │       └── techhub/
+│   │   │           ├── ResourceBookingSystemApplication.java
+│   │   │           ├── config/
+│   │   │           │   ├── JwtConfig.java
+│   │   │           │   ├── OpenApiConfig.java
+│   │   │           │   ├── PasswordConfig.java
+│   │   │           │   ├── RoleDataInitializer.java
+│   │   │           │   ├── SecurityBeansConfig.java
+│   │   │           │   ├── SecurityConfig.java
+│   │   │           │   └── UserDataInitializer.java
+│   │   │           ├── controller/
+│   │   │           │   ├── AuthController.java
+│   │   │           │   ├── ReservationController.java
+│   │   │           │   └── ResourceController.java
+│   │   │           ├── dto/
+│   │   │           │   ├── LoginRequest.java
+│   │   │           │   ├── LoginResponse.java
+│   │   │           │   ├── RegisterRequest.java
+│   │   │           │   ├── ReservationRequest.java
+│   │   │           │   ├── ReservationResponse.java
+│   │   │           │   ├── ResourceRequest.java
+│   │   │           │   ├── ResourceResponse.java
+│   │   │           │   └── ValidationErrorResponse.java
+│   │   │           ├── entity/
+│   │   │           │   ├── Reservation.java
+│   │   │           │   ├── ReservationStatus.java
+│   │   │           │   ├── Resource.java
+│   │   │           │   ├── ResourceType.java
+│   │   │           │   ├── Role.java
+│   │   │           │   ├── User.java
+│   │   │           │   ├── UserRole.java
+│   │   │           │   └── UserSession.java
+│   │   │           ├── exception/
+│   │   │           │   ├── GlobalExceptionHandler.java
+│   │   │           │   ├── ReservationNotFoundException.java
+│   │   │           │   ├── ResourceNotFoundException.java
+│   │   │           │   └── UserNotFoundException.java
+│   │   │           ├── repository/
+│   │   │           │   ├── ReservationRepository.java
+│   │   │           │   ├── ResourceRepository.java
+│   │   │           │   ├── RoleRepository.java
+│   │   │           │   ├── UserRepository.java
+│   │   │           │   ├── UserRoleRepository.java
+│   │   │           │   └── UserSessionRepository.java
+│   │   │           ├── security/
+│   │   │           │   ├── JwtAuthenticationFilter.java
+│   │   │           │   └── JwtService.java
+│   │   │           ├── service/
+│   │   │           │   ├── AuthService.java
+│   │   │           │   ├── ReservationService.java
+│   │   │           │   ├── ResourceService.java
+│   │   │           │   └── UserSessionService.java
+│   │   │           └── serviceimpl/
+│   │   │               ├── AuthServiceImpl.java
+│   │   │               ├── ReservationServiceImpl.java
+│   │   │               ├── ResourceServiceImpl.java
+│   │   │               └── UserSessionServiceImpl.java
+│   │   └── resources/
+│   │       └── application.properties
+│   └── test/
+│       ├── java/
+│       │   └── org/
+│       │       └── techhub/
+│       │           ├── ResourceBookingSystemApplicationTests.java
+│       │           ├── controller/
+│       │           │   └── ReservationControllerTest.java
+│       │           ├── security/
+│       │           │   ├── JwtServiceTest.java
+│       │           │   └── SecurityTest.java
+│       │           └── serviceimpl/
+│       │               ├── ReservationOwnershipTest.java
+│       │               ├── ReservationServiceImplTest.java
+│       │               └── ResourceServiceImplTest.java
+│       └── resources/
+│           ├── application.properties
+│           └── application-test.properties
+├── pom.xml
+├── README.md
+├── SETUP.md
+└── .gitignore
+```
 
 ## Prerequisites
 
