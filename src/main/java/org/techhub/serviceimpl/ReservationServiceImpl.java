@@ -314,13 +314,37 @@ public class ReservationServiceImpl implements ReservationService {
             Double maxPrice,
             Pageable pageable) {
 
-        // Execute filter at database level using custom repository query
-        Page<Reservation> reservationPage =
-                reservationRepository.filterReservations(
-                        status,
-                        minPrice,
-                        maxPrice,
-                        pageable);
+        // Check if user is ADMIN
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        boolean isAdmin = authentication.getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals("ADMIN"));
+
+        Page<Reservation> reservationPage;
+
+        if (isAdmin) {
+            // ADMIN can see all reservations
+            reservationPage =
+                    reservationRepository.filterReservations(
+                            status,
+                            minPrice,
+                            maxPrice,
+                            pageable);
+        } else {
+            // Regular USER can only see their own reservations
+            String email = getLoggedInUserEmail();
+            reservationPage =
+                    reservationRepository.filterUserReservations(
+                            email,
+                            status,
+                            minPrice,
+                            maxPrice,
+                            pageable);
+        }
 
         // Convert entity page to response page
         return reservationPage

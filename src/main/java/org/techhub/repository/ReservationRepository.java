@@ -53,4 +53,20 @@ public interface ReservationRepository
             @Param("maxPrice") Double maxPrice,
             Pageable pageable
     );
+
+    // Filter reservations for regular users (by their email)
+    @Query("""
+            SELECT r FROM Reservation r
+            WHERE r.user.email = :userEmail
+            AND (:status IS NULL OR r.status = :status)
+            AND (:minPrice IS NULL OR r.price >= :minPrice)
+            AND (:maxPrice IS NULL OR r.price <= :maxPrice)
+            """)
+    Page<Reservation> filterUserReservations(
+            @Param("userEmail") String userEmail,
+            @Param("status") ReservationStatus status,
+            @Param("minPrice") Double minPrice,
+            @Param("maxPrice") Double maxPrice,
+            Pageable pageable
+    );
 }
