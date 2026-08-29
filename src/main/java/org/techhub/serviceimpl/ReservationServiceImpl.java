@@ -1,10 +1,8 @@
 package org.techhub.serviceimpl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -298,164 +296,17 @@ public class ReservationServiceImpl implements ReservationService {
             Double maxPrice,
             Pageable pageable) {
 
-        // Create mutable list
-        List<Reservation> reservations =
-                new ArrayList<>(
-                        reservationRepository.findAll());
+        // Execute filter at database level using custom repository query
+        Page<Reservation> reservationPage =
+                reservationRepository.filterReservations(
+                        status,
+                        minPrice,
+                        maxPrice,
+                        pageable);
 
-        // =================================================
-        // STATUS FILTER
-        // =================================================
-
-        if (status != null) {
-
-            reservations.removeIf(r ->
-                    r.getStatus() != status);
-        }
-
-        // =================================================
-        // MIN PRICE FILTER
-        // =================================================
-
-        if (minPrice != null) {
-
-            reservations.removeIf(r ->
-                    r.getPrice() == null ||
-                    r.getPrice() < minPrice);
-        }
-
-        // =================================================
-        // MAX PRICE FILTER
-        // =================================================
-
-        if (maxPrice != null) {
-
-            reservations.removeIf(r ->
-                    r.getPrice() == null ||
-                    r.getPrice() > maxPrice);
-        }
-
-        // =================================================
-        // SORTING
-        // =================================================
-
-        if (pageable.getSort().isSorted()) {
-
-            pageable.getSort()
-                    .forEach(order -> {
-
-                        String property =
-                                order.getProperty();
-
-                        boolean ascending =
-                                order.isAscending();
-
-                        // =================================================
-                        // SORT BY PRICE
-                        // =================================================
-
-                        if ("price"
-                                .equalsIgnoreCase(property)) {
-
-                            reservations.sort((r1, r2) -> {
-
-                                Double price1 =
-                                        r1.getPrice();
-
-                                Double price2 =
-                                        r2.getPrice();
-
-                                if (price1 == null) {
-                                    price1 = 0.0;
-                                }
-
-                                if (price2 == null) {
-                                    price2 = 0.0;
-                                }
-
-                                int result =
-                                        Double.compare(
-                                                price1,
-                                                price2);
-
-                                return ascending
-                                        ? result
-                                        : -result;
-                            });
-                        }
-
-                        // =================================================
-                        // SORT BY START TIME
-                        // =================================================
-
-                        if ("startTime"
-                                .equalsIgnoreCase(property)) {
-
-                            reservations.sort((r1, r2) -> {
-
-                                int result =
-                                        r1.getStartTime()
-                                                .compareTo(
-                                                        r2.getStartTime());
-
-                                return ascending
-                                        ? result
-                                        : -result;
-                            });
-                        }
-                    });
-        }
-
-        // =================================================
-        // PAGINATION
-        // =================================================
-
-        int page =
-                pageable.getPageNumber();
-
-        int size =
-                pageable.getPageSize();
-
-        int start =
-                page * size;
-
-        int end =
-                Math.min(
-                        start + size,
-                        reservations.size());
-
-        List<Reservation> pageContent;
-
-        if (start >= reservations.size()) {
-
-            pageContent = List.of();
-
-        } else {
-
-            pageContent =
-                    reservations.subList(
-                            start,
-                            end);
-        }
-
-        // =================================================
-        // CONVERT ENTITY TO DTO
-        // =================================================
-
-        List<ReservationResponse> responseList =
-                pageContent
-                        .stream()
-                        .map(this::convertToResponse)
-                        .toList();
-
-        // =================================================
-        // RETURN PAGE
-        // =================================================
-
-        return new PageImpl<>(
-                responseList,
-                pageable,
-                reservations.size());
+        // Convert entity page to response page
+        return reservationPage
+                .map(this::convertToResponse);
     }
 
     // =====================================================

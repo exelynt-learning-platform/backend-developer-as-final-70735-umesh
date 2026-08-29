@@ -15,6 +15,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import org.techhub.service.UserSessionService;
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -22,13 +24,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
 
+    private final UserSessionService userSessionService;
+
     // Constructor
     public JwtAuthenticationFilter(
             JwtService jwtService,
-            UserDetailsService userDetailsService) {
+            UserDetailsService userDetailsService,
+            UserSessionService userSessionService) {
 
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.userSessionService = userSessionService;
     }
 
     @Override
@@ -78,6 +84,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (jwtService.isTokenExpired(token)) {
 
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            // =================================================
+            // CHECK TOKEN ACTIVE (NOT LOGGED OUT)
+            // =================================================
+
+            if (!userSessionService.isTokenActive(token)) {
+
+                SecurityContextHolder.clearContext();
                 filterChain.doFilter(request, response);
                 return;
             }

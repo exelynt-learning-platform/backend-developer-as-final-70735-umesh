@@ -2,6 +2,8 @@ package org.techhub.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,7 +31,7 @@ public class ResourceController {
 
 	// Create Resource
 	@PostMapping
-	public ResponseEntity<ResourceResponse> createResource(@RequestBody ResourceRequest request) {
+	public ResponseEntity<ResourceResponse> createResource(@Valid @RequestBody ResourceRequest request) {
 
 		ResourceResponse response = resourceService.createResource(request);
 
@@ -60,7 +62,7 @@ public class ResourceController {
 	// Update Resource
 	@PutMapping("/{id}")
 	public ResponseEntity<ResourceResponse> updateResource(@PathVariable Long id,
-			@RequestBody ResourceRequest request) {
+			@Valid @RequestBody ResourceRequest request) {
 
 		return ResponseEntity.ok(resourceService.updateResource(id, request));
 	}
