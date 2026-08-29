@@ -151,7 +151,28 @@ public class ReservationController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortOrder) {
 
-        // Validate price filter range
+        validateFilterParams(minPrice, maxPrice, page, size);
+
+        Pageable pageable = buildPageable(page, size, sortBy, sortOrder);
+
+        Page<ReservationResponse> filteredReservations =
+                reservationService.filterReservations(
+                        status,
+                        minPrice,
+                        maxPrice,
+                        pageable
+                );
+
+        return ResponseEntity.ok(
+                filteredReservations);
+    }
+
+    private void validateFilterParams(
+            Double minPrice,
+            Double maxPrice,
+            int page,
+            int size) {
+
         if (minPrice != null && minPrice < 0) {
             throw new IllegalArgumentException("minPrice cannot be negative");
         }
@@ -164,7 +185,6 @@ public class ReservationController {
             throw new IllegalArgumentException("minPrice cannot be greater than maxPrice");
         }
 
-        // Validate pagination parameters
         if (page < 0) {
             throw new IllegalArgumentException("Page index must not be less than zero");
         }
@@ -172,8 +192,14 @@ public class ReservationController {
         if (size <= 0) {
             throw new IllegalArgumentException("Page size must be greater than zero");
         }
+    }
 
-        // Build Pageable with sorting
+    private Pageable buildPageable(
+            int page,
+            int size,
+            String sortBy,
+            String sortOrder) {
+
         Sort.Direction direction = Sort.Direction.ASC;
 
         if (sortOrder != null
@@ -182,24 +208,24 @@ public class ReservationController {
             direction = Sort.Direction.DESC;
         }
 
-        List<String> allowedSortFields = List.of("id", "price", "startTime", "endTime", "status", "purpose", "createdAt");
-        String sortField = (sortBy != null && allowedSortFields.contains(sortBy)) ? sortBy : "id";
+        List<String> allowedSortFields = List.of(
+                "id",
+                "price",
+                "startTime",
+                "endTime",
+                "status",
+                "purpose",
+                "createdAt"
+        );
 
-        Pageable pageable = PageRequest.of(
+        String sortField = (sortBy != null && allowedSortFields.contains(sortBy))
+                ? sortBy
+                : "id";
+
+        return PageRequest.of(
                 page,
                 size,
                 Sort.by(direction, sortField)
         );
-
-        Page<ReservationResponse> filteredReservations =
-                reservationService.filterReservations(
-                        status,
-                        minPrice,
-                        maxPrice,
-                        pageable
-                );
-
-        return ResponseEntity.ok(
-                filteredReservations);
     }
 }

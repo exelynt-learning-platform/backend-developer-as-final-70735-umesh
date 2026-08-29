@@ -6,9 +6,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.techhub.dto.ResourceRequest;
 import org.techhub.dto.ResourceResponse;
+import org.techhub.entity.Reservation;
+import org.techhub.entity.ReservationStatus;
 import org.techhub.entity.Resource;
 import org.techhub.entity.ResourceType;
 import org.techhub.exception.ResourceNotFoundException;
+import org.techhub.repository.ReservationRepository;
 import org.techhub.repository.ResourceRepository;
 import org.techhub.service.ResourceService;
 
@@ -16,9 +19,13 @@ import org.techhub.service.ResourceService;
 public class ResourceServiceImpl implements ResourceService {
 
     private final ResourceRepository resourceRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ResourceServiceImpl(ResourceRepository resourceRepository) {
+    public ResourceServiceImpl(
+            ResourceRepository resourceRepository,
+            ReservationRepository reservationRepository) {
         this.resourceRepository = resourceRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     @Override
@@ -110,6 +117,24 @@ public class ResourceServiceImpl implements ResourceService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Resource not found with id: " + id));
+
+        // Reject deletion if active or pending reservations exist
+        boolean hasActiveReservations = reservationRepository.existsByResourceIdAndStatusIn(
+                id,
+                List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED)
+        );
+
+        if (hasActiveReservations) {
+            throw new IllegalStateException(
+                    "Cannot delete resource with active or pending reservations"
+            );
+        }
+
+        // Clean up historical cancelled reservations to prevent FK constraint violations
+        List<Reservation> historicalReservations = reservationRepository.findByResourceId(id);
+        if (!historicalReservations.isEmpty()) {
+            reservationRepository.deleteAll(historicalReservations);
+        }
 
         resourceRepository.delete(resource);
     }

@@ -210,6 +210,29 @@ public class GlobalExceptionHandler {
     }
 
     // =====================================================
+    // DATA INTEGRITY VIOLATION EXCEPTION
+    // HTTP 409 / 400
+    // =====================================================
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ValidationErrorResponse> handleDataIntegrityViolation(
+            org.springframework.dao.DataIntegrityViolationException ex) {
+
+        ValidationErrorResponse response =
+                new ValidationErrorResponse(
+                        LocalDateTime.now(),
+                        HttpStatus.CONFLICT.value(),
+                        "Conflict",
+                        "Database constraint violation: The requested entity is referenced by other records or violates unique constraints."
+                );
+
+        return new ResponseEntity<>(
+                response,
+                HttpStatus.CONFLICT
+        );
+    }
+
+    // =====================================================
     // RUNTIME EXCEPTION
     // HTTP 400
     // =====================================================

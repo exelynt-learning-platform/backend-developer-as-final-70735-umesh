@@ -21,6 +21,12 @@ public interface ReservationRepository
     // Resource reservations
     List<Reservation> findByResourceId(Long resourceId);
 
+    // Check if reservations exist for resource
+    boolean existsByResourceId(Long resourceId);
+
+    // Check if active reservations exist for resource
+    boolean existsByResourceIdAndStatusIn(Long resourceId, List<ReservationStatus> statuses);
+
     // Find by status
     List<Reservation> findByStatus(ReservationStatus status);
 
