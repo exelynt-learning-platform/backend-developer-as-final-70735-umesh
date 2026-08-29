@@ -4,6 +4,8 @@ A secure RESTful Resource Booking System developed using Java 17, Spring Boot 3.
 
 The system provides user authentication, role-based authorization, resource management, and reservation management.
 
+**📚 For comprehensive setup and deployment instructions, see [SETUP.md](./SETUP.md)**
+
 ## Features
 
 Authentication:
