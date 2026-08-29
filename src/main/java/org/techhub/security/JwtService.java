@@ -17,14 +17,13 @@ public class JwtService {
 
     private final JwtConfig jwtConfig;
 
-    private final SecretKey secretKey;
-
     // Constructor
     public JwtService(JwtConfig jwtConfig) {
-
         this.jwtConfig = jwtConfig;
+    }
 
-        this.secretKey = Keys.hmacShaKeyFor(
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(
                 jwtConfig.getSecret()
                         .getBytes(StandardCharsets.UTF_8)
         );
@@ -47,7 +46,7 @@ public class JwtService {
                 .subject(email)
                 .issuedAt(currentDate)
                 .expiration(expiryDate)
-                .signWith(secretKey)
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -58,7 +57,7 @@ public class JwtService {
     public String getEmailFromToken(String token) {
 
         Claims claims = Jwts.parser()
-                .verifyWith(secretKey)
+                .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -75,7 +74,7 @@ public class JwtService {
         try {
 
             Jwts.parser()
-                    .verifyWith(secretKey)
+                    .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token);
 
@@ -96,7 +95,7 @@ public class JwtService {
         try {
 
             Claims claims = Jwts.parser()
-                    .verifyWith(secretKey)
+                    .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
