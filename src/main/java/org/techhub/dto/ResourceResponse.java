@@ -22,4 +22,8 @@ public class ResourceResponse {
 	private String description;
 
 	private Boolean available;
+
+	private String location;
+
+	private Double price;
 }

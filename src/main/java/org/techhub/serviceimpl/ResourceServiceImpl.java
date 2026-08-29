@@ -3,6 +3,7 @@ package org.techhub.serviceimpl;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.techhub.dto.ResourceRequest;
 import org.techhub.dto.ResourceResponse;
 import org.techhub.entity.Resource;
@@ -20,6 +21,7 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
+    @Transactional
     public ResourceResponse createResource(ResourceRequest request) {
 
         Resource resource = new Resource();
@@ -27,6 +29,8 @@ public class ResourceServiceImpl implements ResourceService {
         resource.setName(request.getName());
         resource.setType(request.getType());
         resource.setDescription(request.getDescription());
+        resource.setLocation(request.getLocation());
+        resource.setPrice(request.getPrice());
 
         if (request.getAvailable() != null) {
             resource.setAvailable(request.getAvailable());
@@ -70,6 +74,7 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
+    @Transactional
     public ResourceResponse updateResource(
             Long id,
             ResourceRequest request) {
@@ -82,6 +87,8 @@ public class ResourceServiceImpl implements ResourceService {
         resource.setName(request.getName());
         resource.setType(request.getType());
         resource.setDescription(request.getDescription());
+        resource.setLocation(request.getLocation());
+        resource.setPrice(request.getPrice());
 
         if (request.getAvailable() != null) {
             resource.setAvailable(request.getAvailable());
@@ -95,6 +102,7 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
+    @Transactional
     public void deleteResource(Long id) {
 
         Resource resource = resourceRepository.findById(id)
@@ -112,7 +120,9 @@ public class ResourceServiceImpl implements ResourceService {
                 resource.getName(),
                 resource.getType(),
                 resource.getDescription(),
-                resource.getAvailable()
+                resource.getAvailable(),
+                resource.getLocation(),
+                resource.getPrice()
         );
     }
 }

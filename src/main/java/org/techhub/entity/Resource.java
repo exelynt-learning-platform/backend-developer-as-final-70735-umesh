@@ -40,6 +40,12 @@ public class Resource {
 	@Column(nullable = false)
 	private Boolean available = true;
 
+	@Column(length = 200)
+	private String location;
+
+	@Column(nullable = true)
+	private Double price;
+
 	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;
 

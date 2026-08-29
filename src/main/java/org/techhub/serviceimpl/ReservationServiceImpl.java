@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.techhub.dto.ReservationRequest;
 import org.techhub.dto.ReservationResponse;
@@ -43,6 +44,7 @@ public class ReservationServiceImpl implements ReservationService {
     // =====================================================
 
     @Override
+    @Transactional
     public ReservationResponse createReservation(
             ReservationRequest request) {
 
@@ -212,9 +214,11 @@ public class ReservationServiceImpl implements ReservationService {
 
     // =====================================================
     // USER - CANCEL OWN RESERVATION
+    // ADMIN - CANCEL ANY RESERVATION
     // =====================================================
 
     @Override
+    @Transactional
     public ReservationResponse cancelReservation(Long id) {
 
         Reservation reservation =
@@ -225,15 +229,28 @@ public class ReservationServiceImpl implements ReservationService {
                                         "Reservation not found with id: "
                                                 + id));
 
-        String email = getLoggedInUserEmail();
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
 
-        // User can cancel only own reservation
-        if (!reservation.getUser()
-                .getEmail()
-                .equals(email)) {
+        // Check if user is ADMIN
+        boolean isAdmin = authentication.getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals("ADMIN"));
 
-            throw new RuntimeException(
-                    "You can cancel only your own reservation");
+        // If not ADMIN, check if user owns the reservation
+        if (!isAdmin) {
+
+            String email = getLoggedInUserEmail();
+
+            if (!reservation.getUser()
+                    .getEmail()
+                    .equals(email)) {
+
+                throw new RuntimeException(
+                        "You can cancel only your own reservation");
+            }
         }
 
         // Change status
@@ -265,6 +282,7 @@ public class ReservationServiceImpl implements ReservationService {
     // =====================================================
 
     @Override
+    @Transactional
     public ReservationResponse confirmReservation(Long id) {
 
         Reservation reservation =

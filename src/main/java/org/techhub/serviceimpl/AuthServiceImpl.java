@@ -5,6 +5,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.techhub.dto.LoginRequest;
 import org.techhub.dto.LoginResponse;
@@ -49,6 +50,7 @@ public class AuthServiceImpl implements AuthService {
     // =====================================================
 
     @Override
+    @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest loginRequest) {
 
         Authentication authentication =
@@ -81,6 +83,7 @@ public class AuthServiceImpl implements AuthService {
     // =====================================================
 
     @Override
+    @Transactional
     public String register(RegisterRequest registerRequest) {
 
         // Check email already exists
