@@ -151,7 +151,7 @@ public class ReservationController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortOrder) {
 
-        validateFilterParams(minPrice, maxPrice, page, size);
+        validateFilterParams(minPrice, maxPrice, page, size, sortBy, sortOrder);
 
         Pageable pageable = buildPageable(page, size, sortBy, sortOrder);
 
@@ -171,7 +171,9 @@ public class ReservationController {
             Double minPrice,
             Double maxPrice,
             int page,
-            int size) {
+            int size,
+            String sortBy,
+            String sortOrder) {
 
         if (minPrice != null && minPrice < 0) {
             throw new IllegalArgumentException("minPrice cannot be negative");
@@ -192,21 +194,6 @@ public class ReservationController {
         if (size <= 0) {
             throw new IllegalArgumentException("Page size must be greater than zero");
         }
-    }
-
-    private Pageable buildPageable(
-            int page,
-            int size,
-            String sortBy,
-            String sortOrder) {
-
-        Sort.Direction direction = Sort.Direction.ASC;
-
-        if (sortOrder != null
-                && sortOrder.equalsIgnoreCase("desc")) {
-
-            direction = Sort.Direction.DESC;
-        }
 
         List<String> allowedSortFields = List.of(
                 "id",
@@ -218,7 +205,32 @@ public class ReservationController {
                 "createdAt"
         );
 
-        String sortField = (sortBy != null && allowedSortFields.contains(sortBy))
+        if (sortBy != null && !sortBy.isBlank() && !allowedSortFields.contains(sortBy)) {
+            throw new IllegalArgumentException(
+                    "Invalid sort field: '" + sortBy + "'. Allowed fields are: " + String.join(", ", allowedSortFields)
+            );
+        }
+
+        if (sortOrder != null
+                && !sortOrder.equalsIgnoreCase("asc")
+                && !sortOrder.equalsIgnoreCase("desc")) {
+            throw new IllegalArgumentException(
+                    "Invalid sort order: '" + sortOrder + "'. Allowed values are 'asc' or 'desc'."
+            );
+        }
+    }
+
+    private Pageable buildPageable(
+            int page,
+            int size,
+            String sortBy,
+            String sortOrder) {
+
+        Sort.Direction direction = (sortOrder != null && sortOrder.equalsIgnoreCase("desc"))
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+
+        String sortField = (sortBy != null && !sortBy.isBlank())
                 ? sortBy
                 : "id";
 

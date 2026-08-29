@@ -126,4 +126,16 @@ class ReservationControllerTest {
         )
         .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void filterReservations_invalidSortField_shouldReturnBadRequest()
+            throws Exception {
+
+        mockMvc.perform(
+                get("/reservations/filter")
+                        .with(user("user@gmail.com").authorities(new SimpleGrantedAuthority("USER")))
+                        .param("sortBy", "invalidColumn")
+        )
+        .andExpect(status().isBadRequest());
+    }
 }
