@@ -74,7 +74,10 @@ public class SecurityConfig {
                         // AUTH APIs
                         // =================================================
 
-                        .requestMatchers("/auth/**")
+                        .requestMatchers(HttpMethod.POST, "/auth/logout")
+                        .authenticated()
+
+                        .requestMatchers("/auth/login", "/auth/register")
                         .permitAll()
 
                         // =================================================

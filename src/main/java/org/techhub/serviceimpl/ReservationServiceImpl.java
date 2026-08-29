@@ -191,6 +191,10 @@ public class ReservationServiceImpl implements ReservationService {
                         .getContext()
                         .getAuthentication();
 
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AccessDeniedException("User is not authenticated");
+        }
+
         // ADMIN can access any reservation
         if (authentication.getAuthorities()
                 .stream()
@@ -203,9 +207,9 @@ public class ReservationServiceImpl implements ReservationService {
         // USER can access only own reservation
         String email = authentication.getName();
 
-        if (!reservation.getUser()
-                .getEmail()
-                .equals(email)) {
+        if (reservation.getUser() == null
+                || reservation.getUser().getEmail() == null
+                || !reservation.getUser().getEmail().equals(email)) {
 
             throw new AccessDeniedException(
                     "You are not authorized to access this reservation");
@@ -242,6 +246,10 @@ public class ReservationServiceImpl implements ReservationService {
                         .getContext()
                         .getAuthentication();
 
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AccessDeniedException("User is not authenticated");
+        }
+
         // Check if user is ADMIN
         boolean isAdmin = authentication.getAuthorities()
                 .stream()
@@ -250,14 +258,14 @@ public class ReservationServiceImpl implements ReservationService {
         // If not ADMIN, check if user owns the reservation
         if (!isAdmin) {
 
-            String email = getLoggedInUserEmail();
+            String email = authentication.getName();
 
-            if (!reservation.getUser()
-                    .getEmail()
-                    .equals(email)) {
+            if (reservation.getUser() == null
+                    || reservation.getUser().getEmail() == null
+                    || !reservation.getUser().getEmail().equals(email)) {
 
                 throw new AccessDeniedException(
-                        "You can cancel only your own reservation");
+                        "You are not authorized to cancel this reservation");
             }
         }
 
@@ -384,7 +392,7 @@ public class ReservationServiceImpl implements ReservationService {
         if (authentication == null ||
                 !authentication.isAuthenticated()) {
 
-            throw new RuntimeException(
+            throw new AccessDeniedException(
                     "User is not authenticated");
         }
 
@@ -398,22 +406,21 @@ public class ReservationServiceImpl implements ReservationService {
     private ReservationResponse convertToResponse(
             Reservation reservation) {
 
+        if (reservation == null) {
+            return null;
+        }
+
+        Long userId = reservation.getUser() != null ? reservation.getUser().getId() : null;
+        Long resourceId = reservation.getResource() != null ? reservation.getResource().getId() : null;
+
         return new ReservationResponse(
-
                 reservation.getId(),
-
-                reservation.getUser().getId(),
-
-                reservation.getResource().getId(),
-
+                userId,
+                resourceId,
                 reservation.getStartTime(),
-
                 reservation.getEndTime(),
-
                 reservation.getPrice(),
-
                 reservation.getStatus(),
-
                 reservation.getPurpose()
         );
     }
