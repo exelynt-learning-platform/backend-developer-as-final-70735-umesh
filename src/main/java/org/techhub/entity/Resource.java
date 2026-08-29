@@ -43,7 +43,7 @@ public class Resource {
 	@Column(length = 200)
 	private String location;
 
-	@Column(nullable = true)
+	@Column
 	private Double price;
 
 	@Column(name = "created_at", nullable = false)
