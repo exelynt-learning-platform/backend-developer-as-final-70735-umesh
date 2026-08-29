@@ -102,34 +102,58 @@ public class AuthServiceImpl implements AuthService {
                         new RuntimeException(
                                 "USER role not found"));
 
-        // Create User
-        User user = new User();
+        // Verify role is not null (defensive programming)
+        if (userRole == null) {
+            throw new RuntimeException(
+                    "Failed to retrieve USER role - unexpected null value");
+        }
 
-        user.setName(registerRequest.getName());
+        try {
+            // Create User
+            User user = new User();
 
-        user.setEmail(registerRequest.getEmail());
+            user.setName(registerRequest.getName());
 
-        // BCrypt password
-        user.setPassword(
-                passwordEncoder.encode(
-                        registerRequest.getPassword()
-                )
-        );
+            user.setEmail(registerRequest.getEmail());
 
-        user.setEnabled(true);
+            // BCrypt password
+            user.setPassword(
+                    passwordEncoder.encode(
+                            registerRequest.getPassword()
+                    )
+            );
 
-        // Save User
-        User savedUser = userRepository.save(user);
+            user.setEnabled(true);
 
-        // Create UserRole
-        UserRole userRoleEntity = new UserRole();
+            // Save User
+            User savedUser = userRepository.save(user);
 
-        userRoleEntity.setUser(savedUser);
+            if (savedUser == null) {
+                throw new RuntimeException(
+                        "Failed to save user - unexpected null value");
+            }
 
-        userRoleEntity.setRole(userRole);
+            // Create UserRole
+            UserRole userRoleEntity = new UserRole();
 
-        userRoleRepository.save(userRoleEntity);
+            userRoleEntity.setUser(savedUser);
 
-        return "User registration successful";
+            userRoleEntity.setRole(userRole);
+
+            UserRole savedUserRole = userRoleRepository.save(userRoleEntity);
+
+            if (savedUserRole == null) {
+                throw new RuntimeException(
+                        "Failed to assign role to user");
+            }
+
+            return "User registration successful";
+
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Error during user registration: " + e.getMessage(), e);
+        }
     }
 }

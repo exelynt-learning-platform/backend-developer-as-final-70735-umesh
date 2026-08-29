@@ -154,8 +154,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (Exception e) {
 
             // Invalid / expired / malformed JWT
-            SecurityContextHolder
-                    .clearContext();
+            SecurityContextHolder.clearContext();
+            response.sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "Authentication failed: Invalid or malformed token");
+            return;
         }
 
         // =====================================================

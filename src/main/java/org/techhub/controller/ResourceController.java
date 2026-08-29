@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +31,7 @@ public class ResourceController {
 	}
 
 	// Create Resource
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping
 	public ResponseEntity<ResourceResponse> createResource(@Valid @RequestBody ResourceRequest request) {
 
@@ -39,6 +41,7 @@ public class ResourceController {
 	}
 
 	// Get All Resources
+	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 	@GetMapping
 	public ResponseEntity<List<ResourceResponse>> getAllResources() {
 
@@ -46,6 +49,7 @@ public class ResourceController {
 	}
 
 	// Get Resource By ID
+	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 	@GetMapping("/{id}")
 	public ResponseEntity<ResourceResponse> getResourceById(@PathVariable Long id) {
 
@@ -53,6 +57,7 @@ public class ResourceController {
 	}
 
 	// Get Resources By Type
+	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 	@GetMapping("/type/{type}")
 	public ResponseEntity<List<ResourceResponse>> getResourcesByType(@PathVariable ResourceType type) {
 
@@ -60,6 +65,7 @@ public class ResourceController {
 	}
 
 	// Update Resource
+	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{id}")
 	public ResponseEntity<ResourceResponse> updateResource(@PathVariable Long id,
 			@Valid @RequestBody ResourceRequest request) {
@@ -68,6 +74,7 @@ public class ResourceController {
 	}
 
 	// Delete Resource
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<String> deleteResource(@PathVariable Long id) {
 

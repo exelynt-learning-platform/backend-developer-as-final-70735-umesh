@@ -42,6 +42,7 @@ public class ReservationController {
     // CREATE RESERVATION
     // =====================================================
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(
             @Valid @RequestBody ReservationRequest request) {
@@ -59,6 +60,7 @@ public class ReservationController {
     // GET MY RESERVATIONS
     // =====================================================
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/my")
     public ResponseEntity<List<ReservationResponse>>
     getMyReservations() {
@@ -74,6 +76,7 @@ public class ReservationController {
     // ADMIN -> ANY
     // =====================================================
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/{id}")
     public ResponseEntity<ReservationResponse>
     getReservationById(
@@ -89,6 +92,7 @@ public class ReservationController {
     // CANCEL OWN RESERVATION
     // =====================================================
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ReservationResponse>
     cancelReservation(
@@ -104,6 +108,7 @@ public class ReservationController {
     // GET ALL RESERVATIONS
     // =====================================================
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/all")
     public ResponseEntity<List<ReservationResponse>>
     getAllReservations() {
@@ -118,6 +123,7 @@ public class ReservationController {
     // CONFIRM RESERVATION
     // =====================================================
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/{id}/confirm")
     public ResponseEntity<ReservationResponse>
     confirmReservation(
